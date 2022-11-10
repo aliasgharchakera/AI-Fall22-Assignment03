@@ -11,6 +11,7 @@ import math
 import random
 import matplotlib.image as mpimg
 import matplotlib.pyplot as plt
+import matplotlib.animation as anm
 
 
 class KMeansClustering:
@@ -25,7 +26,9 @@ class KMeansClustering:
         self.clusters = dict()
         self.index = dict()
         self.error = 9999
+        self.total_error = 0
         self.result = self.image.copy()
+        self.animation = None
     
     
     def __generate_initial_centroids(self) -> list :
@@ -55,15 +58,27 @@ class KMeansClustering:
                 # self.clusters[pos].append((a, b, self.image[a][b]))
                 self.clusters[pos].append(self.image[a][b])
                 self.index[pos].append((a, b))
+                self.result[i][j] = self.centroids[pos]
+        # self.show_result()
         return self.clusters
     
+    def average(self, arr):
+        r, g, b, count = 0, 0, 0, len(arr)
+        for i in arr:
+            r += i[0]
+            g += i[1]
+            b += i[2]
+        if count:
+            return (r/count, g/count, b/count)
+        return (r, g, b)
     
     def __recompute_centroids(self)->list:
         #your code here to return new centroids based on cluster formation
         for i in range(self.K):
             # rgb = self.clusters[i][2]
             rgb = self.clusters[i]
-            avg = np.average(rgb, axis=0)
+            avg = self.average(rgb)
+            # avg = np.average(rgb, axis=(0,1,2))
             new_cluster = (int(avg[0]), int(avg[1]), int(avg[2]))
             # new_cluster = np.average(rgb, axis=0)
             # print(new_cluster)
@@ -82,6 +97,7 @@ class KMeansClustering:
         self.__assign_clusters()
         # self.show_result()
         while self.error > 0.5:
+            # self.show_result()
             self.__recompute_centroids()
             self.__assign_clusters()
         # self.show_result()
@@ -102,16 +118,18 @@ class KMeansClustering:
         # print(self.clusters[1][10])
     
     def show_result(self):
+        # self.animation = plt.imshow(self.result)
         plt.imshow(self.result)
+        plt.imsave("results\sample5.jpg", self.result)
         plt.show()
+        
         
     def print_centroids(self):
         #This function prints all centroids formed by Kmeans clustering
         print(self.centroids)
        
         
-kmeans = KMeansClustering("images\sample1.jpg", 5)
+kmeans = KMeansClustering("images\sample5.jpg", 5)
 kmeans.apply()
 kmeans.show_result()
-# kmeans.print_centroids()    
-    
+# kmeans.print_centroids()
