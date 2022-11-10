@@ -11,6 +11,7 @@ import math
 import random
 import matplotlib.image as mpimg
 import matplotlib.pyplot as plt
+import matplotlib.animation as anm
 
 
 class KMeansClustering:
@@ -28,6 +29,7 @@ class KMeansClustering:
         self.total_error = list()
         self.total = 0
         self.result = self.image.copy()
+        self.animation = None
     
     
     def __generate_initial_centroids(self) -> list :
@@ -102,6 +104,7 @@ class KMeansClustering:
         # self.show_result()
         iteration = 0
         while self.error > 0.5:
+            # self.show_result()
             self.__recompute_centroids()
             self.__assign_clusters()
             # if iteration % 3 == 0:
@@ -124,16 +127,18 @@ class KMeansClustering:
         # print(self.clusters[1][10])
     
     def show_result(self):
-        # plt.imshow(self.result)
+        # self.animation = plt.imshow(self.result)
+        plt.imshow(self.result)
+        plt.imsave("results\sample5.jpg", self.result)
         plt.show()
+        
         
     def print_centroids(self):
         #This function prints all centroids formed by Kmeans clustering
         print(self.centroids)
        
         
-kmeans = KMeansClustering("images\sample1.jpg", 5)
+kmeans = KMeansClustering("images\sample5.jpg", 5)
 kmeans.apply()
 kmeans.show_result()
-# kmeans.print_centroids()    
-    
+# kmeans.print_centroids()
