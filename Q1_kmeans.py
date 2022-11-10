@@ -30,7 +30,8 @@ class KMeansClustering:
         #write your code here to return initial random centroids
         for i in range(self.K):
             h, w = random.randint(0, self.height), random.randint(0, self.width)
-            self.centroids.append((h, w, self.image[h][w]))
+            # self.centroids.append((h, w, self.image[h][w]))
+            self.centroids.append(self.image[h][w])
             self.clusters[i] = list()
         return self.centroids
     
@@ -40,25 +41,27 @@ class KMeansClustering:
 
     def __assign_clusters(self)->dict:
         #assign each data point to its nearest cluster (centroid)
-        for i in range(self.width):
-            for j in range(self.height):
+        for i in range(self.height):
+            for j in range(self.width):
                 d = 99999999
                 a, b, pos = 0, 0, 0
                 for k in range(self.K):
-                    dist = self.__calculate_distance((i, j), self.centroids[k])
+                    dist = self.__calculate_distance(self.image[i][j], self.centroids[k])
                     if dist < d:
                         d, a, b, pos = dist, i, j, k
-                self.clusters[pos].append((a, b, self.image[a][b]))
+                # self.clusters[pos].append((a, b, self.image[a][b]))
+                self.clusters[pos].append(self.image[a][b])
         return self.clusters
     
     
     def __recompute_centroids(self)->list:
         #your code here to return new centroids based on cluster formation
         for i in range(self.K):
-            rgb = self.clusters[i][2]
+            # rgb = self.clusters[i][2]
+            rgb = self.clusters[i]
             new_cluster = tuple(np.average(rgb, axis=0))
             # new = (new_cluster[0], new_cluster[1])
-            self.error = self.__calculate_distance(self.centroids[i][2], new_cluster)
+            self.error = self.__calculate_distance(self.centroids[i], new_cluster)
             print(self.error)
             self.centroids[i] = new_cluster
         return list()
@@ -70,14 +73,17 @@ class KMeansClustering:
         while self.error > 0.5:
             self.__assign_clusters()
             self.__recompute_centroids()
-        print(self.centroids)
-        # print(self.clusters)
+        self.print_centroids()
+        self.__save_image()
         
        
  
     def __save_image(self):
         #This function overwrites original image with segmented image to be shown later.
-        pass
+        for i in self.clusters:
+            for j in self.clusters[i]:
+                self.clusters[i][j] = self.centroids[i]
+        
     
     def show_result(self):
         plt.imshow(self.image)
