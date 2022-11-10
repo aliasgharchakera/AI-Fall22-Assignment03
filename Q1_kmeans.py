@@ -25,12 +25,10 @@ class KMeansClustering:
         self.centroids = list()
         self.clusters = dict()
         self.index = dict()
-        self.error = 9999
-        self.total_error = list()
-        self.total = 0
+        self.net_error = 9999
+        self.centroid_delta = list()
+        self.mse = list()
         self.result = self.image.copy()
-        self.animation = None
-    
     
     def __generate_initial_centroids(self) -> list :
         #write your code here to return initial random centroids
@@ -61,7 +59,7 @@ class KMeansClustering:
                 # self.clusters[pos].append((a, b, self.image[a][b]))
                 self.clusters[pos].append(self.image[a][b])
                 self.index[pos].append((a, b))
-        # self.total_error.append(error)
+        self.mse.append(error)
         return self.clusters
     
     def average(self, arr, rgb):
@@ -76,24 +74,24 @@ class KMeansClustering:
     
     def __recompute_centroids(self)->list:
         #your code here to return new centroids based on cluster formation
-        total = 0
+        self.net_error = 0
         for i in range(self.K):
             # rgb = self.clusters[i][2]
             rgb = self.clusters[i]
             avg = self.average(rgb, self.centroids[i])
+            '''can use np's built in average function as well but i made my own'''
             # avg = np.average(rgb, axis=0)
             new_cluster = (int(avg[0]), int(avg[1]), int(avg[2]))
-            # new_cluster = np.average(rgb, axis=0)
             # print(new_cluster)
             # new = (new_cluster[0], new_cluster[1])
-            self.error = self.__calculate_distance(self.centroids[i], new_cluster)
+            error = self.__calculate_distance(self.centroids[i], new_cluster)
             # print(self.error)
             self.centroids[i] = new_cluster
             self.clusters[i] = list()
             self.index[i] = list()
-            total += self.error
+            self.net_error += error
         # plt.plot(total)
-        self.total_error.append(total)
+        self.centroid_delta.append(self.net_error)
         return self.centroids
 
    
@@ -103,12 +101,16 @@ class KMeansClustering:
         self.__assign_clusters()
         # self.show_result()
         iteration = 0
-        while self.error > 0.5:
+        while self.net_error > 0.5:
             # self.show_result()
             self.__recompute_centroids()
             self.__assign_clusters()
             # if iteration % 3 == 0:
-            plt.plot(self.total_error)
+            '''plotting error and the change in centroids
+            (1) plots the delta between old and new centroid
+            (2) plots the sum of distances of points with their centroids (all clusters summed)'''
+            plt.plot(self.centroid_delta) # (1)
+            # plt.plot(np.log(self.mse))    # (2)
         # self.show_result()
         # self.print_centroids()
         self.__save_image()
@@ -127,8 +129,10 @@ class KMeansClustering:
         # print(self.clusters[1][10])
     
     def show_result(self):
-        # self.animation = plt.imshow(self.result)
-        plt.imshow(self.result)
+        '''uncomment this line to view the result of the clustering
+        by default the plot will show the error graph'''
+        # plt.imshow(self.result)
+        # change the sample number if u change the input file
         plt.imsave("results\sample5.jpg", self.result)
         plt.show()
         
